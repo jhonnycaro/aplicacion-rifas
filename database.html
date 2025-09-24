@@ -1,0 +1,1769 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión de Estudiantes - Base de Datos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 15px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #6c757d;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .nav-tab.active {
+            color: #4facfe;
+            border-bottom-color: #4facfe;
+            background: white;
+        }
+
+        .nav-tab:hover {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 30px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 4px solid #4facfe;
+        }
+
+        .form-section h3 {
+            color: #495057;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 5px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(86, 171, 47, 0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .search-container {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 250px;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-top: 4px solid #4facfe;
+        }
+
+        .stat-card h3 {
+            font-size: 2rem;
+            color: #4facfe;
+            margin-bottom: 10px;
+        }
+
+        .stat-card p {
+            color: #6c757d;
+            font-weight: 600;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .nav-tabs {
+                flex-direction: column;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .search-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-input {
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 Sistema de Gestión de Estudiantes</h1>
+            <p>Base de datos completa con funcionalidades CRUD</p>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('dashboard')">📊 Dashboard</button>
+            <button class="nav-tab" onclick="showTab('students')">👥 Estudiantes</button>
+            <button class="nav-tab" onclick="showTab('courses')">📚 Cursos</button>
+            <button class="nav-tab" onclick="showTab('enrollments')">📝 Inscripciones</button>
+            <button class="nav-tab" onclick="showTab('reports')">📈 Reportes</button>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <h2>📊 Panel de Control</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3 id="totalStudents">0</h3>
+                    <p>Total Estudiantes</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="totalCourses">0</h3>
+                    <p>Total Cursos</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="totalEnrollments">0</h3>
+                    <p>Total Inscripciones</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="averageGrade">0</h3>
+                    <p>Promedio General</p>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>🚀 Acciones Rápidas</h3>
+                <button class="btn btn-primary" onclick="showTab('students')">Agregar Estudiante</button>
+                <button class="btn btn-success" onclick="showTab('courses')">Crear Curso</button>
+                <button class="btn btn-warning" onclick="showTab('enrollments')">Nueva Inscripción</button>
+                <button class="btn btn-danger" onclick="initializeDatabase()">Reiniciar Base de Datos</button>
+            </div>
+        </div>
+
+        <!-- Students Tab -->
+        <div id="students" class="tab-content">
+            <h2>👥 Gestión de Estudiantes</h2>
+            
+            <div class="form-section">
+                <h3>➕ Agregar Nuevo Estudiante</h3>
+                <form id="studentForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="studentName">Nombre Completo *</label>
+                            <input type="text" id="studentName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="studentEmail">Email *</label>
+                            <input type="email" id="studentEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="studentPhone">Teléfono</label>
+                            <input type="tel" id="studentPhone">
+                        </div>
+                        <div class="form-group">
+                            <label for="studentAge">Edad</label>
+                            <input type="number" id="studentAge" min="16" max="100">
+                        </div>
+                        <div class="form-group">
+                            <label for="studentGender">Género</label>
+                            <select id="studentGender">
+                                <option value="">Seleccionar...</option>
+                                <option value="Masculino">Masculino</option>
+                                <option value="Femenino">Femenino</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="studentCareer">Carrera</label>
+                            <input type="text" id="studentCareer">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="studentAddress">Dirección</label>
+                        <textarea id="studentAddress" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">💾 Guardar Estudiante</button>
+                    <button type="button" class="btn btn-warning" onclick="clearStudentForm()">🔄 Limpiar</button>
+                </form>
+            </div>
+
+            <div class="search-container">
+                <input type="text" class="search-input" id="studentSearch" placeholder="🔍 Buscar estudiantes por nombre, email o carrera...">
+                <button class="btn btn-primary" onclick="searchStudents()">Buscar</button>
+                <button class="btn btn-success" onclick="exportStudents()">📤 Exportar</button>
+            </div>
+
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Email</th>
+                            <th>Teléfono</th>
+                            <th>Edad</th>
+                            <th>Carrera</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentsTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Courses Tab -->
+        <div id="courses" class="tab-content">
+            <h2>📚 Gestión de Cursos</h2>
+            
+            <div class="form-section">
+                <h3>➕ Crear Nuevo Curso</h3>
+                <form id="courseForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="courseName">Nombre del Curso *</label>
+                            <input type="text" id="courseName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="courseCode">Código del Curso *</label>
+                            <input type="text" id="courseCode" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="courseCredits">Créditos</label>
+                            <input type="number" id="courseCredits" min="1" max="10">
+                        </div>
+                        <div class="form-group">
+                            <label for="courseProfessor">Profesor</label>
+                            <input type="text" id="courseProfessor">
+                        </div>
+                        <div class="form-group">
+                            <label for="courseSchedule">Horario</label>
+                            <input type="text" id="courseSchedule" placeholder="Ej: Lun-Mie-Vie 8:00-10:00">
+                        </div>
+                        <div class="form-group">
+                            <label for="courseCapacity">Capacidad Máxima</label>
+                            <input type="number" id="courseCapacity" min="1" max="100">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="courseDescription">Descripción</label>
+                        <textarea id="courseDescription" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success">💾 Guardar Curso</button>
+                    <button type="button" class="btn btn-warning" onclick="clearCourseForm()">🔄 Limpiar</button>
+                </form>
+            </div>
+
+            <div class="search-container">
+                <input type="text" class="search-input" id="courseSearch" placeholder="🔍 Buscar cursos por nombre, código o profesor...">
+                <button class="btn btn-primary" onclick="searchCourses()">Buscar</button>
+                <button class="btn btn-success" onclick="exportCourses()">📤 Exportar</button>
+            </div>
+
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Código</th>
+                            <th>Nombre</th>
+                            <th>Créditos</th>
+                            <th>Profesor</th>
+                            <th>Horario</th>
+                            <th>Capacidad</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="coursesTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Enrollments Tab -->
+        <div id="enrollments" class="tab-content">
+            <h2>📝 Gestión de Inscripciones</h2>
+            
+            <div class="form-section">
+                <h3>➕ Nueva Inscripción</h3>
+                <form id="enrollmentForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="enrollmentStudent">Estudiante *</label>
+                            <select id="enrollmentStudent" required>
+                                <option value="">Seleccionar estudiante...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="enrollmentCourse">Curso *</label>
+                            <select id="enrollmentCourse" required>
+                                <option value="">Seleccionar curso...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="enrollmentDate">Fecha de Inscripción</label>
+                            <input type="date" id="enrollmentDate">
+                        </div>
+                        <div class="form-group">
+                            <label for="enrollmentGrade">Calificación</label>
+                            <input type="number" id="enrollmentGrade" min="0" max="100" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label for="enrollmentStatus">Estado</label>
+                            <select id="enrollmentStatus">
+                                <option value="Activo">Activo</option>
+                                <option value="Completado">Completado</option>
+                                <option value="Retirado">Retirado</option>
+                                <option value="Suspendido">Suspendido</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-warning">💾 Guardar Inscripción</button>
+                    <button type="button" class="btn btn-warning" onclick="clearEnrollmentForm()">🔄 Limpiar</button>
+                </form>
+            </div>
+
+            <div class="search-container">
+                <input type="text" class="search-input" id="enrollmentSearch" placeholder="🔍 Buscar inscripciones...">
+                <button class="btn btn-primary" onclick="searchEnrollments()">Buscar</button>
+                <button class="btn btn-success" onclick="exportEnrollments()">📤 Exportar</button>
+            </div>
+
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Estudiante</th>
+                            <th>Curso</th>
+                            <th>Fecha Inscripción</th>
+                            <th>Calificación</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="enrollmentsTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Reports Tab -->
+        <div id="reports" class="tab-content">
+            <h2>📈 Reportes y Estadísticas</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3 id="reportActiveStudents">0</h3>
+                    <p>Estudiantes Activos</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="reportActiveCourses">0</h3>
+                    <p>Cursos Activos</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="reportCompletedEnrollments">0</h3>
+                    <p>Cursos Completados</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="reportHighestGrade">0</h3>
+                    <p>Calificación Más Alta</p>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>📊 Reportes Detallados</h3>
+                <button class="btn btn-primary" onclick="generateStudentReport()">👥 Reporte de Estudiantes</button>
+                <button class="btn btn-success" onclick="generateCourseReport()">📚 Reporte de Cursos</button>
+                <button class="btn btn-warning" onclick="generateGradeReport()">📝 Reporte de Calificaciones</button>
+                <button class="btn btn-danger" onclick="generateFullReport()">📋 Reporte Completo</button>
+            </div>
+
+            <div id="reportContent" class="form-section" style="display: none;">
+                <h3>📄 Contenido del Reporte</h3>
+                <div id="reportData"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for editing -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // Base de datos en memoria usando LocalStorage
+        class Database {
+            constructor() {
+                this.students = JSON.parse(localStorage.getItem('students')) || [];
+                this.courses = JSON.parse(localStorage.getItem('courses')) || [];
+                this.enrollments = JSON.parse(localStorage.getItem('enrollments')) || [];
+                this.nextStudentId = parseInt(localStorage.getItem('nextStudentId')) || 1;
+                this.nextCourseId = parseInt(localStorage.getItem('nextCourseId')) || 1;
+                this.nextEnrollmentId = parseInt(localStorage.getItem('nextEnrollmentId')) || 1;
+                
+                // Inicializar con datos de ejemplo si está vacía
+                if (this.students.length === 0) {
+                    this.initializeWithSampleData();
+                }
+            }
+
+            save() {
+                localStorage.setItem('students', JSON.stringify(this.students));
+                localStorage.setItem('courses', JSON.stringify(this.courses));
+                localStorage.setItem('enrollments', JSON.stringify(this.enrollments));
+                localStorage.setItem('nextStudentId', this.nextStudentId.toString());
+                localStorage.setItem('nextCourseId', this.nextCourseId.toString());
+                localStorage.setItem('nextEnrollmentId', this.nextEnrollmentId.toString());
+            }
+
+            initializeWithSampleData() {
+                // Estudiantes de ejemplo
+                const sampleStudents = [
+                    {
+                        id: 1,
+                        name: "Ana García López",
+                        email: "ana.garcia@email.com",
+                        phone: "555-0101",
+                        age: 20,
+                        gender: "Femenino",
+                        career: "Ingeniería de Sistemas",
+                        address: "Calle 123 #45-67, Bogotá"
+                    },
+                    {
+                        id: 2,
+                        name: "Carlos Rodríguez",
+                        email: "carlos.rodriguez@email.com",
+                        phone: "555-0102",
+                        age: 22,
+                        gender: "Masculino",
+                        career: "Administración de Empresas",
+                        address: "Carrera 78 #12-34, Medellín"
+                    },
+                    {
+                        id: 3,
+                        name: "María Fernández",
+                        email: "maria.fernandez@email.com",
+                        phone: "555-0103",
+                        age: 19,
+                        gender: "Femenino",
+                        career: "Psicología",
+                        address: "Avenida 56 #89-12, Cali"
+                    }
+                ];
+
+                // Cursos de ejemplo
+                const sampleCourses = [
+                    {
+                        id: 1,
+                        name: "Programación Web",
+                        code: "PROG001",
+                        credits: 4,
+                        professor: "Dr. Juan Pérez",
+                        schedule: "Lun-Mie-Vie 8:00-10:00",
+                        capacity: 30,
+                        description: "Curso introductorio a la programación web con HTML, CSS y JavaScript"
+                    },
+                    {
+                        id: 2,
+                        name: "Base de Datos",
+                        code: "BD001",
+                        credits: 3,
+                        professor: "Dra. Laura Martínez",
+                        schedule: "Mar-Jue 14:00-16:00",
+                        capacity: 25,
+                        description: "Fundamentos de bases de datos relacionales y SQL"
+                    },
+                    {
+                        id: 3,
+                        name: "Matemáticas Discretas",
+                        code: "MAT001",
+                        credits: 3,
+                        professor: "Dr. Roberto Silva",
+                        schedule: "Lun-Mie 10:00-12:00",
+                        capacity: 35,
+                        description: "Conceptos fundamentales de matemáticas discretas para informática"
+                    }
+                ];
+
+                // Inscripciones de ejemplo
+                const sampleEnrollments = [
+                    {
+                        id: 1,
+                        studentId: 1,
+                        courseId: 1,
+                        enrollmentDate: "2024-01-15",
+                        grade: 85.5,
+                        status: "Activo"
+                    },
+                    {
+                        id: 2,
+                        studentId: 1,
+                        courseId: 2,
+                        enrollmentDate: "2024-01-15",
+                        grade: 92.0,
+                        status: "Completado"
+                    },
+                    {
+                        id: 3,
+                        studentId: 2,
+                        courseId: 1,
+                        enrollmentDate: "2024-01-16",
+                        grade: 78.5,
+                        status: "Activo"
+                    },
+                    {
+                        id: 4,
+                        studentId: 3,
+                        courseId: 3,
+                        enrollmentDate: "2024-01-17",
+                        grade: 88.0,
+                        status: "Activo"
+                    }
+                ];
+
+                this.students = sampleStudents;
+                this.courses = sampleCourses;
+                this.enrollments = sampleEnrollments;
+                this.nextStudentId = 4;
+                this.nextCourseId = 4;
+                this.nextEnrollmentId = 5;
+                this.save();
+            }
+
+            // CRUD para Estudiantes
+            addStudent(student) {
+                student.id = this.nextStudentId++;
+                this.students.push(student);
+                this.save();
+                return student;
+            }
+
+            updateStudent(id, updatedStudent) {
+                const index = this.students.findIndex(s => s.id === id);
+                if (index !== -1) {
+                    this.students[index] = { ...this.students[index], ...updatedStudent };
+                    this.save();
+                    return this.students[index];
+                }
+                return null;
+            }
+
+            deleteStudent(id) {
+                const index = this.students.findIndex(s => s.id === id);
+                if (index !== -1) {
+                    this.students.splice(index, 1);
+                    // También eliminar inscripciones relacionadas
+                    this.enrollments = this.enrollments.filter(e => e.studentId !== id);
+                    this.save();
+                    return true;
+                }
+                return false;
+            }
+
+            getStudent(id) {
+                return this.students.find(s => s.id === id);
+            }
+
+            getAllStudents() {
+                return this.students;
+            }
+
+            // CRUD para Cursos
+            addCourse(course) {
+                course.id = this.nextCourseId++;
+                this.courses.push(course);
+                this.save();
+                return course;
+            }
+
+            updateCourse(id, updatedCourse) {
+                const index = this.courses.findIndex(c => c.id === id);
+                if (index !== -1) {
+                    this.courses[index] = { ...this.courses[index], ...updatedCourse };
+                    this.save();
+                    return this.courses[index];
+                }
+                return null;
+            }
+
+            deleteCourse(id) {
+                const index = this.courses.findIndex(c => c.id === id);
+                if (index !== -1) {
+                    this.courses.splice(index, 1);
+                    // También eliminar inscripciones relacionadas
+                    this.enrollments = this.enrollments.filter(e => e.courseId !== id);
+                    this.save();
+                    return true;
+                }
+                return false;
+            }
+
+            getCourse(id) {
+                return this.courses.find(c => c.id === id);
+            }
+
+            getAllCourses() {
+                return this.courses;
+            }
+
+            // CRUD para Inscripciones
+            addEnrollment(enrollment) {
+                enrollment.id = this.nextEnrollmentId++;
+                this.enrollments.push(enrollment);
+                this.save();
+                return enrollment;
+            }
+
+            updateEnrollment(id, updatedEnrollment) {
+                const index = this.enrollments.findIndex(e => e.id === id);
+                if (index !== -1) {
+                    this.enrollments[index] = { ...this.enrollments[index], ...updatedEnrollment };
+                    this.save();
+                    return this.enrollments[index];
+                }
+                return null;
+            }
+
+            deleteEnrollment(id) {
+                const index = this.enrollments.findIndex(e => e.id === id);
+                if (index !== -1) {
+                    this.enrollments.splice(index, 1);
+                    this.save();
+                    return true;
+                }
+                return false;
+            }
+
+            getEnrollment(id) {
+                return this.enrollments.find(e => e.id === id);
+            }
+
+            getAllEnrollments() {
+                return this.enrollments;
+            }
+
+            // Métodos de búsqueda
+            searchStudents(query) {
+                const lowerQuery = query.toLowerCase();
+                return this.students.filter(student => 
+                    student.name.toLowerCase().includes(lowerQuery) ||
+                    student.email.toLowerCase().includes(lowerQuery) ||
+                    student.career.toLowerCase().includes(lowerQuery)
+                );
+            }
+
+            searchCourses(query) {
+                const lowerQuery = query.toLowerCase();
+                return this.courses.filter(course => 
+                    course.name.toLowerCase().includes(lowerQuery) ||
+                    course.code.toLowerCase().includes(lowerQuery) ||
+                    course.professor.toLowerCase().includes(lowerQuery)
+                );
+            }
+
+            searchEnrollments(query) {
+                const lowerQuery = query.toLowerCase();
+                return this.enrollments.filter(enrollment => {
+                    const student = this.getStudent(enrollment.studentId);
+                    const course = this.getCourse(enrollment.courseId);
+                    return (student && student.name.toLowerCase().includes(lowerQuery)) ||
+                           (course && course.name.toLowerCase().includes(lowerQuery)) ||
+                           enrollment.status.toLowerCase().includes(lowerQuery);
+                });
+            }
+
+            // Estadísticas
+            getStats() {
+                const totalStudents = this.students.length;
+                const totalCourses = this.courses.length;
+                const totalEnrollments = this.enrollments.length;
+                const grades = this.enrollments.filter(e => e.grade).map(e => e.grade);
+                const averageGrade = grades.length > 0 ? (grades.reduce((a, b) => a + b, 0) / grades.length).toFixed(1) : 0;
+                
+                return {
+                    totalStudents,
+                    totalCourses,
+                    totalEnrollments,
+                    averageGrade,
+                    activeStudents: this.students.length,
+                    activeCourses: this.courses.length,
+                    completedEnrollments: this.enrollments.filter(e => e.status === 'Completado').length,
+                    highestGrade: grades.length > 0 ? Math.max(...grades).toFixed(1) : 0
+                };
+            }
+        }
+
+        // Instancia global de la base de datos
+        const db = new Database();
+
+        // Funciones de navegación
+        function showTab(tabName) {
+            // Ocultar todas las pestañas
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Mostrar la pestaña seleccionada
+            document.getElementById(tabName).classList.add('active');
+            
+            // Actualizar botones de navegación
+            const navTabs = document.querySelectorAll('.nav-tab');
+            navTabs.forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Cargar datos específicos de la pestaña
+            switch(tabName) {
+                case 'dashboard':
+                    updateDashboard();
+                    break;
+                case 'students':
+                    loadStudentsTable();
+                    break;
+                case 'courses':
+                    loadCoursesTable();
+                    break;
+                case 'enrollments':
+                    loadEnrollmentsTable();
+                    loadEnrollmentSelects();
+                    break;
+                case 'reports':
+                    updateReports();
+                    break;
+            }
+        }
+
+        // Funciones del Dashboard
+        function updateDashboard() {
+            const stats = db.getStats();
+            document.getElementById('totalStudents').textContent = stats.totalStudents;
+            document.getElementById('totalCourses').textContent = stats.totalCourses;
+            document.getElementById('totalEnrollments').textContent = stats.totalEnrollments;
+            document.getElementById('averageGrade').textContent = stats.averageGrade;
+        }
+
+        // Funciones de Estudiantes
+        document.getElementById('studentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const student = {
+                name: document.getElementById('studentName').value,
+                email: document.getElementById('studentEmail').value,
+                phone: document.getElementById('studentPhone').value,
+                age: parseInt(document.getElementById('studentAge').value) || null,
+                gender: document.getElementById('studentGender').value,
+                career: document.getElementById('studentCareer').value,
+                address: document.getElementById('studentAddress').value
+            };
+            
+            try {
+                db.addStudent(student);
+                showAlert('Estudiante agregado exitosamente', 'success');
+                clearStudentForm();
+                loadStudentsTable();
+                updateDashboard();
+            } catch (error) {
+                showAlert('Error al agregar estudiante: ' + error.message, 'error');
+            }
+        });
+
+        function clearStudentForm() {
+            document.getElementById('studentForm').reset();
+        }
+
+        function loadStudentsTable() {
+            const tbody = document.getElementById('studentsTableBody');
+            const students = db.getAllStudents();
+            
+            tbody.innerHTML = students.map(student => `
+                <tr>
+                    <td>${student.id}</td>
+                    <td>${student.name}</td>
+                    <td>${student.email}</td>
+                    <td>${student.phone || 'N/A'}</td>
+                    <td>${student.age || 'N/A'}</td>
+                    <td>${student.career || 'N/A'}</td>
+                    <td>
+                        <button class="btn btn-primary" onclick="editStudent(${student.id})">✏️ Editar</button>
+                        <button class="btn btn-danger" onclick="deleteStudent(${student.id})">🗑️ Eliminar</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function searchStudents() {
+            const query = document.getElementById('studentSearch').value;
+            const students = query ? db.searchStudents(query) : db.getAllStudents();
+            
+            const tbody = document.getElementById('studentsTableBody');
+            tbody.innerHTML = students.map(student => `
+                <tr>
+                    <td>${student.id}</td>
+                    <td>${student.name}</td>
+                    <td>${student.email}</td>
+                    <td>${student.phone || 'N/A'}</td>
+                    <td>${student.age || 'N/A'}</td>
+                    <td>${student.career || 'N/A'}</td>
+                    <td>
+                        <button class="btn btn-primary" onclick="editStudent(${student.id})">✏️ Editar</button>
+                        <button class="btn btn-danger" onclick="deleteStudent(${student.id})">🗑️ Eliminar</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function editStudent(id) {
+            const student = db.getStudent(id);
+            if (!student) return;
+            
+            const modalContent = `
+                <h3>✏️ Editar Estudiante</h3>
+                <form id="editStudentForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Nombre Completo *</label>
+                            <input type="text" id="editStudentName" value="${student.name}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email *</label>
+                            <input type="email" id="editStudentEmail" value="${student.email}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Teléfono</label>
+                            <input type="tel" id="editStudentPhone" value="${student.phone || ''}">
+                        </div>
+                        <div class="form-group">
+                            <label>Edad</label>
+                            <input type="number" id="editStudentAge" value="${student.age || ''}" min="16" max="100">
+                        </div>
+                        <div class="form-group">
+                            <label>Género</label>
+                            <select id="editStudentGender">
+                                <option value="">Seleccionar...</option>
+                                <option value="Masculino" ${student.gender === 'Masculino' ? 'selected' : ''}>Masculino</option>
+                                <option value="Femenino" ${student.gender === 'Femenino' ? 'selected' : ''}>Femenino</option>
+                                <option value="Otro" ${student.gender === 'Otro' ? 'selected' : ''}>Otro</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Carrera</label>
+                            <input type="text" id="editStudentCareer" value="${student.career || ''}">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Dirección</label>
+                        <textarea id="editStudentAddress" rows="3">${student.address || ''}</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">💾 Actualizar</button>
+                    <button type="button" class="btn btn-warning" onclick="closeModal()">❌ Cancelar</button>
+                </form>
+            `;
+            
+            document.getElementById('modalContent').innerHTML = modalContent;
+            document.getElementById('editModal').style.display = 'block';
+            
+            document.getElementById('editStudentForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const updatedStudent = {
+                    name: document.getElementById('editStudentName').value,
+                    email: document.getElementById('editStudentEmail').value,
+                    phone: document.getElementById('editStudentPhone').value,
+                    age: parseInt(document.getElementById('editStudentAge').value) || null,
+                    gender: document.getElementById('editStudentGender').value,
+                    career: document.getElementById('editStudentCareer').value,
+                    address: document.getElementById('editStudentAddress').value
+                };
+                
+                try {
+                    db.updateStudent(id, updatedStudent);
+                    showAlert('Estudiante actualizado exitosamente', 'success');
+                    closeModal();
+                    loadStudentsTable();
+                } catch (error) {
+                    showAlert('Error al actualizar estudiante: ' + error.message, 'error');
+                }
+            });
+        }
+
+        function deleteStudent(id) {
+            if (confirm('¿Está seguro de que desea eliminar este estudiante? Esta acción también eliminará todas sus inscripciones.')) {
+                try {
+                    db.deleteStudent(id);
+                    showAlert('Estudiante eliminado exitosamente', 'success');
+                    loadStudentsTable();
+                    updateDashboard();
+                } catch (error) {
+                    showAlert('Error al eliminar estudiante: ' + error.message, 'error');
+                }
+            }
+        }
+
+        function exportStudents() {
+            const students = db.getAllStudents();
+            const csv = convertToCSV(students);
+            downloadCSV(csv, 'estudiantes.csv');
+        }
+
+        // Funciones de Cursos
+        document.getElementById('courseForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const course = {
+                name: document.getElementById('courseName').value,
+                code: document.getElementById('courseCode').value,
+                credits: parseInt(document.getElementById('courseCredits').value) || null,
+                professor: document.getElementById('courseProfessor').value,
+                schedule: document.getElementById('courseSchedule').value,
+                capacity: parseInt(document.getElementById('courseCapacity').value) || null,
+                description: document.getElementById('courseDescription').value
+            };
+            
+            try {
+                db.addCourse(course);
+                showAlert('Curso creado exitosamente', 'success');
+                clearCourseForm();
+                loadCoursesTable();
+                updateDashboard();
+            } catch (error) {
+                showAlert('Error al crear curso: ' + error.message, 'error');
+            }
+        });
+
+        function clearCourseForm() {
+            document.getElementById('courseForm').reset();
+        }
+
+        function loadCoursesTable() {
+            const tbody = document.getElementById('coursesTableBody');
+            const courses = db.getAllCourses();
+            
+            tbody.innerHTML = courses.map(course => `
+                <tr>
+                    <td>${course.id}</td>
+                    <td>${course.code}</td>
+                    <td>${course.name}</td>
+                    <td>${course.credits || 'N/A'}</td>
+                    <td>${course.professor || 'N/A'}</td>
+                    <td>${course.schedule || 'N/A'}</td>
+                    <td>${course.capacity || 'N/A'}</td>
+                    <td>
+                        <button class="btn btn-primary" onclick="editCourse(${course.id})">✏️ Editar</button>
+                        <button class="btn btn-danger" onclick="deleteCourse(${course.id})">🗑️ Eliminar</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function searchCourses() {
+            const query = document.getElementById('courseSearch').value;
+            const courses = query ? db.searchCourses(query) : db.getAllCourses();
+            
+            const tbody = document.getElementById('coursesTableBody');
+            tbody.innerHTML = courses.map(course => `
+                <tr>
+                    <td>${course.id}</td>
+                    <td>${course.code}</td>
+                    <td>${course.name}</td>
+                    <td>${course.credits || 'N/A'}</td>
+                    <td>${course.professor || 'N/A'}</td>
+                    <td>${course.schedule || 'N/A'}</td>
+                    <td>${course.capacity || 'N/A'}</td>
+                    <td>
+                        <button class="btn btn-primary" onclick="editCourse(${course.id})">✏️ Editar</button>
+                        <button class="btn btn-danger" onclick="deleteCourse(${course.id})">🗑️ Eliminar</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function editCourse(id) {
+            const course = db.getCourse(id);
+            if (!course) return;
+            
+            const modalContent = `
+                <h3>✏️ Editar Curso</h3>
+                <form id="editCourseForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Nombre del Curso *</label>
+                            <input type="text" id="editCourseName" value="${course.name}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Código del Curso *</label>
+                            <input type="text" id="editCourseCode" value="${course.code}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Créditos</label>
+                            <input type="number" id="editCourseCredits" value="${course.credits || ''}" min="1" max="10">
+                        </div>
+                        <div class="form-group">
+                            <label>Profesor</label>
+                            <input type="text" id="editCourseProfessor" value="${course.professor || ''}">
+                        </div>
+                        <div class="form-group">
+                            <label>Horario</label>
+                            <input type="text" id="editCourseSchedule" value="${course.schedule || ''}">
+                        </div>
+                        <div class="form-group">
+                            <label>Capacidad Máxima</label>
+                            <input type="number" id="editCourseCapacity" value="${course.capacity || ''}" min="1" max="100">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Descripción</label>
+                        <textarea id="editCourseDescription" rows="3">${course.description || ''}</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success">💾 Actualizar</button>
+                    <button type="button" class="btn btn-warning" onclick="closeModal()">❌ Cancelar</button>
+                </form>
+            `;
+            
+            document.getElementById('modalContent').innerHTML = modalContent;
+            document.getElementById('editModal').style.display = 'block';
+            
+            document.getElementById('editCourseForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const updatedCourse = {
+                    name: document.getElementById('editCourseName').value,
+                    code: document.getElementById('editCourseCode').value,
+                    credits: parseInt(document.getElementById('editCourseCredits').value) || null,
+                    professor: document.getElementById('editCourseProfessor').value,
+                    schedule: document.getElementById('editCourseSchedule').value,
+                    capacity: parseInt(document.getElementById('editCourseCapacity').value) || null,
+                    description: document.getElementById('editCourseDescription').value
+                };
+                
+                try {
+                    db.updateCourse(id, updatedCourse);
+                    showAlert('Curso actualizado exitosamente', 'success');
+                    closeModal();
+                    loadCoursesTable();
+                } catch (error) {
+                    showAlert('Error al actualizar curso: ' + error.message, 'error');
+                }
+            });
+        }
+
+        function deleteCourse(id) {
+            if (confirm('¿Está seguro de que desea eliminar este curso? Esta acción también eliminará todas las inscripciones relacionadas.')) {
+                try {
+                    db.deleteCourse(id);
+                    showAlert('Curso eliminado exitosamente', 'success');
+                    loadCoursesTable();
+                    updateDashboard();
+                } catch (error) {
+                    showAlert('Error al eliminar curso: ' + error.message, 'error');
+                }
+            }
+        }
+
+        function exportCourses() {
+            const courses = db.getAllCourses();
+            const csv = convertToCSV(courses);
+            downloadCSV(csv, 'cursos.csv');
+        }
+
+        // Funciones de Inscripciones
+        function loadEnrollmentSelects() {
+            const studentSelect = document.getElementById('enrollmentStudent');
+            const courseSelect = document.getElementById('enrollmentCourse');
+            
+            // Cargar estudiantes
+            const students = db.getAllStudents();
+            studentSelect.innerHTML = '<option value="">Seleccionar estudiante...</option>' +
+                students.map(student => `<option value="${student.id}">${student.name}</option>`).join('');
+            
+            // Cargar cursos
+            const courses = db.getAllCourses();
+            courseSelect.innerHTML = '<option value="">Seleccionar curso...</option>' +
+                courses.map(course => `<option value="${course.id}">${course.name} (${course.code})</option>`).join('');
+        }
+
+        document.getElementById('enrollmentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const enrollment = {
+                studentId: parseInt(document.getElementById('enrollmentStudent').value),
+                courseId: parseInt(document.getElementById('enrollmentCourse').value),
+                enrollmentDate: document.getElementById('enrollmentDate').value || new Date().toISOString().split('T')[0],
+                grade: parseFloat(document.getElementById('enrollmentGrade').value) || null,
+                status: document.getElementById('enrollmentStatus').value
+            };
+            
+            try {
+                db.addEnrollment(enrollment);
+                showAlert('Inscripción creada exitosamente', 'success');
+                clearEnrollmentForm();
+                loadEnrollmentsTable();
+                updateDashboard();
+            } catch (error) {
+                showAlert('Error al crear inscripción: ' + error.message, 'error');
+            }
+        });
+
+        function clearEnrollmentForm() {
+            document.getElementById('enrollmentForm').reset();
+            document.getElementById('enrollmentDate').value = new Date().toISOString().split('T')[0];
+        }
+
+        function loadEnrollmentsTable() {
+            const tbody = document.getElementById('enrollmentsTableBody');
+            const enrollments = db.getAllEnrollments();
+            
+            tbody.innerHTML = enrollments.map(enrollment => {
+                const student = db.getStudent(enrollment.studentId);
+                const course = db.getCourse(enrollment.courseId);
+                
+                return `
+                    <tr>
+                        <td>${enrollment.id}</td>
+                        <td>${student ? student.name : 'N/A'}</td>
+                        <td>${course ? course.name : 'N/A'}</td>
+                        <td>${enrollment.enrollmentDate}</td>
+                        <td>${enrollment.grade || 'N/A'}</td>
+                        <td><span class="badge badge-${enrollment.status.toLowerCase()}">${enrollment.status}</span></td>
+                        <td>
+                            <button class="btn btn-primary" onclick="editEnrollment(${enrollment.id})">✏️ Editar</button>
+                            <button class="btn btn-danger" onclick="deleteEnrollment(${enrollment.id})">🗑️ Eliminar</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function searchEnrollments() {
+            const query = document.getElementById('enrollmentSearch').value;
+            const enrollments = query ? db.searchEnrollments(query) : db.getAllEnrollments();
+            
+            const tbody = document.getElementById('enrollmentsTableBody');
+            tbody.innerHTML = enrollments.map(enrollment => {
+                const student = db.getStudent(enrollment.studentId);
+                const course = db.getCourse(enrollment.courseId);
+                
+                return `
+                    <tr>
+                        <td>${enrollment.id}</td>
+                        <td>${student ? student.name : 'N/A'}</td>
+                        <td>${course ? course.name : 'N/A'}</td>
+                        <td>${enrollment.enrollmentDate}</td>
+                        <td>${enrollment.grade || 'N/A'}</td>
+                        <td><span class="badge badge-${enrollment.status.toLowerCase()}">${enrollment.status}</span></td>
+                        <td>
+                            <button class="btn btn-primary" onclick="editEnrollment(${enrollment.id})">✏️ Editar</button>
+                            <button class="btn btn-danger" onclick="deleteEnrollment(${enrollment.id})">🗑️ Eliminar</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function editEnrollment(id) {
+            const enrollment = db.getEnrollment(id);
+            if (!enrollment) return;
+            
+            const students = db.getAllStudents();
+            const courses = db.getAllCourses();
+            
+            const modalContent = `
+                <h3>✏️ Editar Inscripción</h3>
+                <form id="editEnrollmentForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Estudiante *</label>
+                            <select id="editEnrollmentStudent" required>
+                                ${students.map(student => 
+                                    `<option value="${student.id}" ${student.id === enrollment.studentId ? 'selected' : ''}>${student.name}</option>`
+                                ).join('')}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Curso *</label>
+                            <select id="editEnrollmentCourse" required>
+                                ${courses.map(course => 
+                                    `<option value="${course.id}" ${course.id === enrollment.courseId ? 'selected' : ''}>${course.name} (${course.code})</option>`
+                                ).join('')}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Fecha de Inscripción</label>
+                            <input type="date" id="editEnrollmentDate" value="${enrollment.enrollmentDate}">
+                        </div>
+                        <div class="form-group">
+                            <label>Calificación</label>
+                            <input type="number" id="editEnrollmentGrade" value="${enrollment.grade || ''}" min="0" max="100" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label>Estado</label>
+                            <select id="editEnrollmentStatus">
+                                <option value="Activo" ${enrollment.status === 'Activo' ? 'selected' : ''}>Activo</option>
+                                <option value="Completado" ${enrollment.status === 'Completado' ? 'selected' : ''}>Completado</option>
+                                <option value="Retirado" ${enrollment.status === 'Retirado' ? 'selected' : ''}>Retirado</option>
+                                <option value="Suspendido" ${enrollment.status === 'Suspendido' ? 'selected' : ''}>Suspendido</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-warning">💾 Actualizar</button>
+                    <button type="button" class="btn btn-warning" onclick="closeModal()">❌ Cancelar</button>
+                </form>
+            `;
+            
+            document.getElementById('modalContent').innerHTML = modalContent;
+            document.getElementById('editModal').style.display = 'block';
+            
+            document.getElementById('editEnrollmentForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const updatedEnrollment = {
+                    studentId: parseInt(document.getElementById('editEnrollmentStudent').value),
+                    courseId: parseInt(document.getElementById('editEnrollmentCourse').value),
+                    enrollmentDate: document.getElementById('editEnrollmentDate').value,
+                    grade: parseFloat(document.getElementById('editEnrollmentGrade').value) || null,
+                    status: document.getElementById('editEnrollmentStatus').value
+                };
+                
+                try {
+                    db.updateEnrollment(id, updatedEnrollment);
+                    showAlert('Inscripción actualizada exitosamente', 'success');
+                    closeModal();
+                    loadEnrollmentsTable();
+                } catch (error) {
+                    showAlert('Error al actualizar inscripción: ' + error.message, 'error');
+                }
+            });
+        }
+
+        function deleteEnrollment(id) {
+            if (confirm('¿Está seguro de que desea eliminar esta inscripción?')) {
+                try {
+                    db.deleteEnrollment(id);
+                    showAlert('Inscripción eliminada exitosamente', 'success');
+                    loadEnrollmentsTable();
+                    updateDashboard();
+                } catch (error) {
+                    showAlert('Error al eliminar inscripción: ' + error.message, 'error');
+                }
+            }
+        }
+
+        function exportEnrollments() {
+            const enrollments = db.getAllEnrollments().map(enrollment => {
+                const student = db.getStudent(enrollment.studentId);
+                const course = db.getCourse(enrollment.courseId);
+                return {
+                    ...enrollment,
+                    studentName: student ? student.name : 'N/A',
+                    courseName: course ? course.name : 'N/A'
+                };
+            });
+            const csv = convertToCSV(enrollments);
+            downloadCSV(csv, 'inscripciones.csv');
+        }
+
+        // Funciones de Reportes
+        function updateReports() {
+            const stats = db.getStats();
+            document.getElementById('reportActiveStudents').textContent = stats.activeStudents;
+            document.getElementById('reportActiveCourses').textContent = stats.activeCourses;
+            document.getElementById('reportCompletedEnrollments').textContent = stats.completedEnrollments;
+            document.getElementById('reportHighestGrade').textContent = stats.highestGrade;
+        }
+
+        function generateStudentReport() {
+            const students = db.getAllStudents();
+            const reportContent = `
+                <h4>📊 Reporte de Estudiantes</h4>
+                <p><strong>Total de estudiantes:</strong> ${students.length}</p>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Email</th>
+                                <th>Carrera</th>
+                                <th>Edad</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${students.map(student => `
+                                <tr>
+                                    <td>${student.id}</td>
+                                    <td>${student.name}</td>
+                                    <td>${student.email}</td>
+                                    <td>${student.career || 'N/A'}</td>
+                                    <td>${student.age || 'N/A'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            showReport(reportContent);
+        }
+
+        function generateCourseReport() {
+            const courses = db.getAllCourses();
+            const reportContent = `
+                <h4>📚 Reporte de Cursos</h4>
+                <p><strong>Total de cursos:</strong> ${courses.length}</p>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Código</th>
+                                <th>Nombre</th>
+                                <th>Profesor</th>
+                                <th>Créditos</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${courses.map(course => `
+                                <tr>
+                                    <td>${course.id}</td>
+                                    <td>${course.code}</td>
+                                    <td>${course.name}</td>
+                                    <td>${course.professor || 'N/A'}</td>
+                                    <td>${course.credits || 'N/A'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            showReport(reportContent);
+        }
+
+        function generateGradeReport() {
+            const enrollments = db.getAllEnrollments().filter(e => e.grade);
+            const reportContent = `
+                <h4>📝 Reporte de Calificaciones</h4>
+                <p><strong>Total de calificaciones:</strong> ${enrollments.length}</p>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Estudiante</th>
+                                <th>Curso</th>
+                                <th>Calificación</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${enrollments.map(enrollment => {
+                                const student = db.getStudent(enrollment.studentId);
+                                const course = db.getCourse(enrollment.courseId);
+                                return `
+                                    <tr>
+                                        <td>${student ? student.name : 'N/A'}</td>
+                                        <td>${course ? course.name : 'N/A'}</td>
+                                        <td>${enrollment.grade}</td>
+                                        <td>${enrollment.status}</td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            showReport(reportContent);
+        }
+
+        function generateFullReport() {
+            const stats = db.getStats();
+            const students = db.getAllStudents();
+            const courses = db.getAllCourses();
+            const enrollments = db.getAllEnrollments();
+            
+            const reportContent = `
+                <h4>📋 Reporte Completo del Sistema</h4>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>${stats.totalStudents}</h3>
+                        <p>Total Estudiantes</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>${stats.totalCourses}</h3>
+                        <p>Total Cursos</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>${stats.totalEnrollments}</h3>
+                        <p>Total Inscripciones</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>${stats.averageGrade}</h3>
+                        <p>Promedio General</p>
+                    </div>
+                </div>
+                
+                <h5>📊 Resumen por Carrera</h5>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Carrera</th>
+                                <th>Estudiantes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${Object.entries(
+                                students.reduce((acc, student) => {
+                                    const career = student.career || 'Sin especificar';
+                                    acc[career] = (acc[career] || 0) + 1;
+                                    return acc;
+                                }, {})
+                            ).map(([career, count]) => `
+                                <tr>
+                                    <td>${career}</td>
+                                    <td>${count}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            showReport(reportContent);
+        }
+
+        function showReport(content) {
+            document.getElementById('reportData').innerHTML = content;
+            document.getElementById('reportContent').style.display = 'block';
+        }
+
+        // Funciones de utilidad
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            
+            // Insertar al inicio del contenido activo
+            const activeTab = document.querySelector('.tab-content.active');
+            activeTab.insertBefore(alertDiv, activeTab.firstChild);
+            
+            // Remover después de 5 segundos
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        function closeModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        function convertToCSV(data) {
+            if (data.length === 0) return '';
+            
+            const headers = Object.keys(data[0]);
+            const csvContent = [
+                headers.join(','),
+                ...data.map(row => 
+                    headers.map(header => {
+                        const value = row[header];
+                        return typeof value === 'string' && value.includes(',') 
+                            ? `"${value}"` 
+                            : value;
+                    }).join(',')
+                )
+            ].join('\n');
+            
+            return csvContent;
+        }
+
+        function downloadCSV(csv, filename) {
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function initializeDatabase() {
+            if (confirm('¿Está seguro de que desea reiniciar la base de datos? Se perderán todos los datos actuales.')) {
+                localStorage.clear();
+                location.reload();
+            }
+        }
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            // Establecer fecha actual por defecto
+            document.getElementById('enrollmentDate').value = new Date().toISOString().split('T')[0];
+            
+            // Cargar datos iniciales
+            updateDashboard();
+            loadStudentsTable();
+            loadCoursesTable();
+            loadEnrollmentsTable();
+            loadEnrollmentSelects();
+            updateReports();
+            
+            // Cerrar modal al hacer clic fuera de él
+            window.onclick = function(event) {
+                const modal = document.getElementById('editModal');
+                if (event.target === modal) {
+                    closeModal();
+                }
+            };
+        });
+    </script>
+</body>
+</html>

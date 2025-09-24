@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Talonario Simple</title>
+    <style>
+        .talonario {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 5px;
+            max-width: 600px;
+            margin: 20px auto;
+        }
+        
+        .numero {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: bold;
+            background-color: #f0f0f0;
+        }
+        
+        .numero:hover {
+            background-color: #ddd;
+        }
+        
+        .seleccionado {
+            background-color: #4CAF50 !important;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Talonario de Rifa</h1>
+    <div class="talonario" id="talonario">
+        <!-- Los números se generarán aquí -->
+    </div>
+    
+    <div id="seleccionados"></div>
+
+    <script>
+        let numerosSeleccionados = [];
+        
+        function generarTalonario() {
+            const talonario = document.getElementById('talonario');
+            talonario.innerHTML = '';
+            
+            for (let i = 0; i < 100; i++) {
+                const numero = i.toString().padStart(2, '0');
+                const div = document.createElement('div');
+                div.className = 'numero';
+                div.textContent = numero;
+                div.dataset.numero = numero;
+                div.addEventListener('click', seleccionarNumero);
+                talonario.appendChild(div);
+            }
+        }
+        
+        function seleccionarNumero(e) {
+            const numero = e.target.dataset.numero;
+            if (numerosSeleccionados.includes(numero)) {
+                numerosSeleccionados = numerosSeleccionados.filter(n => n !== numero);
+                e.target.classList.remove('seleccionado');
+            } else {
+                numerosSeleccionados.push(numero);
+                e.target.classList.add('seleccionado');
+            }
+            
+            document.getElementById('seleccionados').innerHTML = 
+                'Seleccionados: ' + numerosSeleccionados.join(', ');
+        }
+        
+        // Inicializar cuando la página cargue
+        document.addEventListener('DOMContentLoaded', function() {
+            generarTalonario();
+        });
+    </script>
+</body>
+</html>
